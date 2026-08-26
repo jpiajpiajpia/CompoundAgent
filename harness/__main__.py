@@ -138,7 +138,8 @@ def main(argv=None) -> int:
     pb = sub.add_parser("batch", help="emit segments to read, best signal first")
     pb.add_argument("--tier", default=None, help="disclosure | opinion | plain")
     pb.add_argument("--show", default=None, help="wayt | tcaf")
-    pb.add_argument("--limit", type=int, default=20)
+    pb.add_argument("--limit", type=int, default=10,
+                    help="segments per batch; keep small, they get long")
     pb.add_argument("--out", default="runs/batch.txt")
     pb.set_defaults(func=cmd_batch)
 
