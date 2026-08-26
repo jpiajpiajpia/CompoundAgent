@@ -37,10 +37,38 @@ def cmd_transcribe(args) -> int:
     return 0
 
 
-def cmd_extract(args) -> int:
+def cmd_batch(args) -> int:
+    from pathlib import Path
     with db.session() as conn:
-        stats = extract.run(conn, limit_episodes=args.limit, show=args.show,
-                            dry_run=args.dry_run)
+        segs = extract.collect_segments(conn, tier=args.tier, show=args.show,
+                                        limit=args.limit)
+    if not segs:
+        print("No unextracted segments match.")
+        return 0
+    dest = Path(args.out)
+    extract.emit_batch(segs, dest)
+    from collections import Counter
+    print(json.dumps({
+        "batch_file": str(dest),
+        "segments": len(segs),
+        "words": sum(s["words"] for s in segs),
+        "by_tier": dict(Counter(s["tier"] for s in segs)),
+        "by_show": dict(Counter(s["show"] for s in segs)),
+        "episodes": len({s["episode_id"] for s in segs}),
+    }, indent=2))
+    return 0
+
+
+def cmd_load(args) -> int:
+    records = json.loads(open(args.file, encoding="utf-8").read())
+    if isinstance(records, dict):
+        records = records.get("mentions", [])
+    with db.session() as conn:
+        stats = extract.load_extractions(conn, records)
+        if args.mark_extracted:
+            for ep in stats["episodes_touched"]:
+                conn.execute("UPDATE episodes SET state='extracted' WHERE id=?", (ep,))
+            conn.commit()
     print(json.dumps(stats, indent=2))
     return 0
 
@@ -107,12 +135,17 @@ def main(argv=None) -> int:
     pt.add_argument("--delay", type=float, default=1.0)
     pt.set_defaults(func=cmd_transcribe)
 
-    pe = sub.add_parser("extract", help="pull stock mentions out of transcripts")
-    pe.add_argument("--limit", type=int, default=None, help="max episodes")
-    pe.add_argument("--show", default=None, help="wayt | tcaf")
-    pe.add_argument("--dry-run", action="store_true",
-                    help="count segments without calling the API")
-    pe.set_defaults(func=cmd_extract)
+    pb = sub.add_parser("batch", help="emit segments to read, best signal first")
+    pb.add_argument("--tier", default=None, help="disclosure | opinion | plain")
+    pb.add_argument("--show", default=None, help="wayt | tcaf")
+    pb.add_argument("--limit", type=int, default=20)
+    pb.add_argument("--out", default="runs/batch.txt")
+    pb.set_defaults(func=cmd_batch)
+
+    pl = sub.add_parser("load", help="load extracted mentions back into the ledger")
+    pl.add_argument("--file", required=True, help="JSON array of mention records")
+    pl.add_argument("--mark-extracted", action="store_true")
+    pl.set_defaults(func=cmd_load)
 
     ps = sub.add_parser("status", help="what is in the ledger")
     ps.set_defaults(func=cmd_status)

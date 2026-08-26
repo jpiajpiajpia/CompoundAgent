@@ -116,3 +116,39 @@ def segment_episode(transcript_path: str, n_speakers: int = 2) -> Dict:
         "segment_words": seg_words,
         "coverage_pct": round(100.0 * seg_words / max(total_words, 1), 1),
     }
+
+
+# --------------------------------------------------------------- tiering
+# Not all segments are worth the same. A host stating their own position is the
+# strongest signal available in this data -- it is skin in the game, often with
+# an entry price attached. Explicit like/dislike is next. Segments that merely
+# name companies with no first-person view are mostly news recap.
+#
+# Measured across the corpus: 110 disclosure / 195 opinion / 248 plain.
+
+DISCLOSURE = re.compile(
+    r"\b(i (bought|own|sold|added|picked up|grabbed|started a position|"
+    r"took a position|trimmed|shorted)"
+    r"|i'?m (buying|selling|long|short|adding|in this)"
+    r"|i have a (stop|position)"
+    r"|we (bought|own|added)"
+    r"|my (position|stop|cost basis)"
+    r"|(bought|added) (it|this|more|to it)"
+    r"|still (own|long|in) (it|this))\b", re.I)
+
+OPINION = re.compile(
+    r"\b(i (like|love|hate|don'?t like)"
+    r"|i think (it|this|they)"
+    r"|best (stock|idea|name)"
+    r"|my (favorite|top) (stock|pick|name)"
+    r"|would (buy|own)"
+    r"|i'?d (buy|own|avoid))\b", re.I)
+
+
+def classify_tier(text: str) -> str:
+    """disclosure > opinion > plain."""
+    if DISCLOSURE.search(text):
+        return "disclosure"
+    if OPINION.search(text):
+        return "opinion"
+    return "plain"
