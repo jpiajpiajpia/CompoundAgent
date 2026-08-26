@@ -11,7 +11,7 @@ Full design: `docs/plan.html`
 
 - [x] Stage 01 Ingest — RSS discovery, show classification, dedupe
 - [x] Stage 02 Transcribe — YouTube playlist catalog, episode matching, captions
-- [ ] Stage 03 Extract mentions
+- [~] Stage 03 Extract mentions — in progress, 100 loaded from 38 segments
 - [ ] Stage 04 Resolve tickers
 - [ ] Backtest replay
 
@@ -21,7 +21,23 @@ Full design: `docs/plan.html`
     python3 -m harness catalog             # pull per-show YouTube playlists
     python3 -m harness match               # pair episodes with their videos
     python3 -m harness transcribe          # download captions
+    python3 -m harness batch --tier disclosure --limit 14 --out runs/batchNN.txt
+    python3 -m harness load --file runs/batchNN.extracted.json --mark-extracted
     python3 -m harness status              # what's in the ledger
+
+Extraction runs in a Claude session, not against a platform API key. `batch`
+emits segments to read; `load` validates and stores the results.
+
+## Rebuilding the ledger
+
+`data/harness.db` is disposable — it rebuilds from tracked inputs:
+
+    python3 -m harness ingest --weeks 52 && python3 -m harness catalog && python3 -m harness match
+    for f in runs/*.extracted.json; do python3 -m harness load --file "$f" --mark-extracted; done
+
+Transcripts (`data/transcripts/`) and extractions (`runs/*.extracted.json`) are
+both committed. The extractions are hand-classified judgement and are the one
+thing here that cannot be regenerated.
 
 Every command is idempotent — safe to re-run.
 
