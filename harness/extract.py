@@ -20,8 +20,6 @@ import os
 import sqlite3
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, Field
-
 from . import segment
 from .db import RunLog, utcnow
 
@@ -83,25 +81,36 @@ Copy it exactly from the transcript; never paraphrase.
 If a segment contains no company mentions at all, return an empty list."""
 
 
-class Mention(BaseModel):
-    ticker: Optional[str] = Field(None, description="US ticker in caps, or null if unsure")
-    company: str = Field(description="Company or fund name as discussed")
-    resolve_confidence: float = Field(description="0-1 confidence the ticker is correct")
-    stance: str = Field(description="strong_bull|bull|neutral|bear|strong_bear")
-    action_language: str = Field(description="buying|owns|watching|sold|shorting|none")
-    horizon: str = Field(description="trade|swing|long_term|unspecified")
-    is_thesis: bool
-    is_news_recap: bool
-    is_hypothetical: bool
-    quote: str = Field(description="Shortest verbatim span justifying the classification")
-    reasoning: str = Field(description="One sentence on why this classification")
+def _schemas():
+    """Build the response schema at call time.
+
+    Stages 01 and 02 are deliberately stdlib-only, so pydantic and anthropic are
+    imported here rather than at module scope -- otherwise a machine without the
+    optional dependencies could not run ingest or status either.
+    """
+    from pydantic import BaseModel, Field
+    from typing import List as _List, Optional as _Optional
+
+    class Mention(BaseModel):
+        ticker: _Optional[str] = Field(None, description="US ticker in caps, or null if unsure")
+        company: str = Field(description="Company or fund name as discussed")
+        resolve_confidence: float = Field(description="0-1 confidence the ticker is correct")
+        stance: str = Field(description="strong_bull|bull|neutral|bear|strong_bear")
+        action_language: str = Field(description="buying|owns|watching|sold|shorting|none")
+        horizon: str = Field(description="trade|swing|long_term|unspecified")
+        is_thesis: bool
+        is_news_recap: bool
+        is_hypothetical: bool
+        quote: str = Field(description="Shortest verbatim span justifying the classification")
+        reasoning: str = Field(description="One sentence on why this classification")
+
+    class SegmentExtraction(BaseModel):
+        mentions: _List[Mention]
+
+    return SegmentExtraction
 
 
-class SegmentExtraction(BaseModel):
-    mentions: List[Mention]
-
-
-def extract_segment(client, seg: Dict, episode_title: str, show: str) -> SegmentExtraction:
+def extract_segment(client, schema, seg: Dict, episode_title: str, show: str):
     user = (
         "Show: {show}\nEpisode: {title}\nSegment timestamp: {mm}:{ss}\n\n"
         "Transcript segment:\n---\n{text}\n---"
@@ -116,13 +125,12 @@ def extract_segment(client, seg: Dict, episode_title: str, show: str) -> Segment
         system=[{"type": "text", "text": SYSTEM_PROMPT,
                  "cache_control": {"type": "ephemeral"}}],
         messages=[{"role": "user", "content": user}],
-        output_format=SegmentExtraction,
+        output_format=schema,
     )
     return resp.parsed_output, resp.usage
 
 
-def store_mentions(conn: sqlite3.Connection, episode_id: str, seg: Dict,
-                   result: SegmentExtraction) -> int:
+def store_mentions(conn: sqlite3.Connection, episode_id: str, seg: Dict, result) -> int:
     now = utcnow()
     n = 0
     for m in result.mentions:
@@ -145,8 +153,6 @@ def store_mentions(conn: sqlite3.Connection, episode_id: str, seg: Dict,
 def run(conn: sqlite3.Connection, limit_episodes: Optional[int] = None,
         show: Optional[str] = None, dry_run: bool = False) -> Dict:
     """Extract mentions for transcribed episodes that haven't been done yet."""
-    import anthropic
-
     q = """SELECT id, show, title, transcript_path FROM episodes
            WHERE transcript_path IS NOT NULL AND state='transcribed'"""
     params: tuple = ()
@@ -169,6 +175,9 @@ def run(conn: sqlite3.Connection, limit_episodes: Optional[int] = None,
             stats["segments"] += len(segs)
         return stats
 
+    import anthropic  # deferred: dry_run must work without it
+
+    schema = _schemas()
     client = anthropic.Anthropic()
 
     with RunLog(conn, "extract") as log:
@@ -178,7 +187,8 @@ def run(conn: sqlite3.Connection, limit_episodes: Optional[int] = None,
             got = 0
             for seg in segs:
                 try:
-                    result, usage = extract_segment(client, seg, ep["title"], ep["show"])
+                    result, usage = extract_segment(
+                        client, schema, seg, ep["title"], ep["show"])
                 except anthropic.APIStatusError as exc:
                     stats["errors"].append({"episode": ep["id"], "error": str(exc)[:150]})
                     continue
