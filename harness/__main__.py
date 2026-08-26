@@ -1,0 +1,110 @@
+"""CLI entry point:  python3 -m harness <command>"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+
+from . import db, ingest, transcribe, youtube
+
+
+def cmd_ingest(args) -> int:
+    with db.session() as conn:
+        summary = ingest.run(conn, weeks=args.weeks)
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+def cmd_catalog(args) -> int:
+    with db.session() as conn:
+        out = youtube.refresh_catalog(conn, limit=args.limit)
+        total = conn.execute("SELECT COUNT(*) FROM youtube_videos").fetchone()[0]
+    print(json.dumps({"stored_per_show": out, "catalog_total": total}, indent=2))
+    return 0
+
+
+def cmd_match(args) -> int:
+    with db.session() as conn:
+        stats = youtube.match_episodes(conn, show=args.show)
+    print(json.dumps(stats, indent=2))
+    return 0
+
+
+def cmd_transcribe(args) -> int:
+    with db.session() as conn:
+        stats = transcribe.run(conn, limit=args.limit, delay=args.delay)
+    print(json.dumps(stats, indent=2))
+    return 0
+
+
+def cmd_status(args) -> int:
+    with db.session() as conn:
+        total = conn.execute("SELECT COUNT(*) FROM episodes").fetchone()[0]
+        if not total:
+            print("No episodes ingested yet. Run:  python3 -m harness ingest")
+            return 0
+
+        print("episodes: {}\n".format(total))
+
+        print("{:<16} {:>6}  {:<12} {:<12}".format("SHOW", "COUNT", "EARLIEST", "LATEST"))
+        rows = conn.execute(
+            """SELECT show, COUNT(*) n, MIN(published_at) lo, MAX(published_at) hi
+               FROM episodes GROUP BY show ORDER BY n DESC"""
+        )
+        for r in rows:
+            print("{:<16} {:>6}  {:<12} {:<12}".format(
+                r["show"], r["n"], r["lo"][:10], r["hi"][:10]))
+
+        print("\nby state:")
+        for r in conn.execute(
+            "SELECT state, COUNT(*) n FROM episodes GROUP BY state ORDER BY n DESC"
+        ):
+            print("  {:<14} {}".format(r["state"], r["n"]))
+
+        m = conn.execute(
+            "SELECT COUNT(*) FROM episodes WHERE youtube_id IS NOT NULL").fetchone()[0]
+        cat = conn.execute("SELECT COUNT(*) FROM youtube_videos").fetchone()[0]
+        print("\nyoutube: {} videos catalogued, {}/{} episodes matched".format(cat, m, total))
+
+        print("\nmost recent:")
+        for r in conn.execute(
+            """SELECT published_at, show, title FROM episodes
+               ORDER BY published_at DESC LIMIT 8"""
+        ):
+            print("  {}  {:<15} {}".format(
+                r["published_at"][:10], r["show"], r["title"][:56]))
+    return 0
+
+
+def main(argv=None) -> int:
+    p = argparse.ArgumentParser(prog="harness", description="Compound Signal Harness")
+    sub = p.add_subparsers(dest="cmd", required=True)
+
+    pi = sub.add_parser("ingest", help="poll feeds and record new episodes")
+    pi.add_argument("--weeks", type=int, default=None,
+                    help="only ingest the last N weeks (default: whole feed)")
+    pi.set_defaults(func=cmd_ingest)
+
+    pc = sub.add_parser("catalog", help="pull per-show YouTube playlists")
+    pc.add_argument("--limit", type=int, default=80,
+                    help="videos per playlist (default 80, ~18 months of weekly shows)")
+    pc.set_defaults(func=cmd_catalog)
+
+    pm = sub.add_parser("match", help="pair episodes with their YouTube videos")
+    pm.add_argument("--show", default=None)
+    pm.set_defaults(func=cmd_match)
+
+    pt = sub.add_parser("transcribe", help="download captions for matched episodes")
+    pt.add_argument("--limit", type=int, default=None)
+    pt.add_argument("--delay", type=float, default=1.0)
+    pt.set_defaults(func=cmd_transcribe)
+
+    ps = sub.add_parser("status", help="what is in the ledger")
+    ps.set_defaults(func=cmd_status)
+
+    args = p.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,996 @@
+<title>Compound Signal Harness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+:root{
+  --ground:#F3F4F6;
+  --surface:#FFFFFF;
+  --surface-2:#EAECF0;
+  --ink:#171A20;
+  --ink-2:#3D434F;
+  --muted:#6B7280;
+  --rule:#DBDEE4;
+  --rule-strong:#C3C8D1;
+  --accent:#8F5806;
+  --accent-bright:#B47614;
+  --accent-soft:#F4E6CC;
+  --risk:#9C2E25;
+  --risk-soft:#F6E2E0;
+  --gain:#26644A;
+  --gain-soft:#DCEDE4;
+  --code-bg:#EEF0F3;
+  --shadow:0 1px 2px rgba(23,26,32,.06), 0 8px 24px -12px rgba(23,26,32,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#12141A;
+    --surface:#191C23;
+    --surface-2:#212630;
+    --ink:#E9E7E3;
+    --ink-2:#C3C7CF;
+    --muted:#8C929E;
+    --rule:#2B303A;
+    --rule-strong:#3B4250;
+    --accent:#E3A94A;
+    --accent-bright:#F0BC66;
+    --accent-soft:#382C16;
+    --risk:#DB6660;
+    --risk-soft:#3A201E;
+    --gain:#5DBA8B;
+    --gain-soft:#16301F;
+    --code-bg:#1E222B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#12141A;
+  --surface:#191C23;
+  --surface-2:#212630;
+  --ink:#E9E7E3;
+  --ink-2:#C3C7CF;
+  --muted:#8C929E;
+  --rule:#2B303A;
+  --rule-strong:#3B4250;
+  --accent:#E3A94A;
+  --accent-bright:#F0BC66;
+  --accent-soft:#382C16;
+  --risk:#DB6660;
+  --risk-soft:#3A201E;
+  --gain:#5DBA8B;
+  --gain-soft:#16301F;
+  --code-bg:#1E222B;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Serif","Iowan Old Style",Georgia,serif;
+  font-size:17px;
+  line-height:1.62;
+  margin:0;
+  padding:0 24px 96px;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{max-width:820px;margin:0 auto}
+
+/* ---------- masthead ---------- */
+.masthead{padding:56px 0 32px;border-bottom:2px solid var(--ink);margin-bottom:0}
+.kicker{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 18px;
+}
+h1{
+  font-family:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  font-weight:700;font-size:clamp(40px,7.5vw,64px);line-height:1.02;
+  letter-spacing:-.015em;margin:0 0 20px;text-wrap:balance;
+}
+.standfirst{
+  font-size:19.5px;line-height:1.55;color:var(--ink-2);margin:0 0 28px;
+  max-width:60ch;
+}
+.standfirst em{color:var(--ink);font-style:italic}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;list-style:none}
+.chip{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11.5px;letter-spacing:.04em;
+  border:1px solid var(--rule-strong);border-radius:2px;
+  padding:5px 10px;color:var(--ink-2);background:var(--surface);
+}
+.chip b{color:var(--accent);font-weight:600}
+
+/* ---------- primer ---------- */
+.primer{
+  background:var(--surface);border:1px solid var(--rule-strong);
+  border-radius:4px;padding:34px 34px 30px;margin:44px 0 0;
+  box-shadow:var(--shadow);
+}
+.primer > h2{font-size:26px;margin-bottom:4px}
+.primer .h2-rule{background:var(--rule-strong)}
+.primer p{font-size:17.5px}
+.plainly{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 12px;
+}
+.steps{list-style:none;padding:0;margin:0 0 8px;counter-reset:s}
+.steps li{
+  display:grid;grid-template-columns:34px 1fr;gap:0 16px;
+  padding:13px 0;border-top:1px solid var(--rule);margin:0;
+}
+.steps li:last-child{border-bottom:1px solid var(--rule)}
+.steps li::before{
+  counter-increment:s;content:counter(s);
+  font-family:"IBM Plex Mono",monospace;font-size:15px;font-weight:600;
+  color:var(--accent);padding-top:1px;
+}
+.steps b{
+  font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;
+  font-size:17.5px;display:block;margin-bottom:2px;
+}
+.steps span{font-size:16px;color:var(--ink-2);display:block;max-width:60ch}
+.aside{
+  font-size:15.5px;color:var(--muted);border-left:2px solid var(--rule-strong);
+  padding:2px 0 2px 15px;margin:0 0 18px;max-width:64ch;
+}
+
+/* ---------- sections ---------- */
+section{padding:52px 0 0}
+h2{
+  font-family:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  font-weight:700;font-size:30px;line-height:1.14;letter-spacing:-.01em;
+  margin:0 0 6px;text-wrap:balance;
+}
+.h2-rule{height:1px;background:var(--rule);margin:0 0 24px}
+h3{
+  font-family:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+  font-weight:600;font-size:19.5px;line-height:1.25;letter-spacing:.002em;
+  margin:34px 0 8px;color:var(--ink);text-wrap:balance;
+}
+h4{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin:26px 0 8px;
+}
+p{margin:0 0 16px;max-width:68ch}
+ul,ol{margin:0 0 18px;padding-left:22px;max-width:68ch}
+li{margin:0 0 8px}
+li::marker{color:var(--muted)}
+strong{font-weight:600}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+
+code{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.855em;background:var(--code-bg);
+  padding:1.5px 5px;border-radius:3px;color:var(--ink);
+  border:1px solid var(--rule);
+}
+pre{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  background:var(--code-bg);border:1px solid var(--rule);border-left:2px solid var(--accent);
+  padding:16px 18px;border-radius:3px;overflow-x:auto;
+  font-size:13px;line-height:1.62;margin:0 0 20px;
+  color:var(--ink);
+}
+pre code{background:none;border:none;padding:0;font-size:inherit}
+.cmt{color:var(--muted)}
+.kw{color:var(--accent)}
+
+/* ---------- callouts ---------- */
+.note{
+  background:var(--surface);border:1px solid var(--rule);
+  border-left:3px solid var(--accent);
+  padding:16px 20px;margin:0 0 22px;border-radius:3px;
+}
+.note.risk{border-left-color:var(--risk);background:var(--risk-soft)}
+.note.risk .note-label{color:var(--risk)}
+.note-label{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--accent);display:block;margin:0 0 7px;
+}
+.note p{margin:0;font-size:16px}
+.note p + p{margin-top:11px}
+
+/* ---------- finding cards ---------- */
+.findings{display:grid;gap:14px;margin:0 0 12px;padding:0;list-style:none;counter-reset:f}
+.finding{
+  background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+  padding:18px 20px 16px;box-shadow:var(--shadow);
+  display:grid;grid-template-columns:auto 1fr;gap:0 16px;align-items:start;
+}
+.finding::before{
+  counter-increment:f;content:counter(f,decimal-leading-zero);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;font-weight:600;
+  color:var(--accent);grid-row:1/span 2;padding-top:3px;
+}
+.finding h3{margin:0 0 5px;font-size:17.5px;grid-column:2}
+.finding div{grid-column:2}
+.finding p{margin:0;font-size:15.5px;color:var(--ink-2);max-width:60ch}
+.finding p + p{margin-top:9px}
+
+/* ---------- pipeline diagram ---------- */
+figure{margin:0 0 10px}
+.diagram-scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:20px 18px}
+svg{display:block;min-width:660px;width:100%;height:auto}
+.n-box{fill:var(--surface-2);stroke:var(--rule-strong);stroke-width:1}
+.n-num{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;fill:var(--accent)}
+.n-title{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:14.5px;font-weight:600;fill:var(--ink)}
+.n-sub{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--muted)}
+.band-label{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;letter-spacing:.11em;fill:var(--muted)}
+.flow{stroke:var(--rule-strong);stroke-width:1.5;fill:none}
+.arrowhead{fill:var(--rule-strong)}
+.capsule{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1}
+.capsule-txt{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;fill:var(--accent)}
+figcaption{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.5;max-width:68ch}
+
+/* ---------- tables ---------- */
+.table-scroll{overflow-x:auto;margin:0 0 12px;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);text-align:left;padding:11px 14px;
+  border-bottom:1px solid var(--rule-strong);white-space:nowrap;
+}
+td{
+  padding:11px 14px;border-bottom:1px solid var(--rule);vertical-align:top;
+  color:var(--ink-2);font-variant-numeric:tabular-nums;
+}
+tbody tr:last-child td{border-bottom:none}
+td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+td.mono,th.mono{font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+.tag{
+  font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:600;
+  letter-spacing:.06em;padding:2.5px 7px;border-radius:2px;white-space:nowrap;
+  display:inline-block;
+}
+.tag.hard{background:var(--risk-soft);color:var(--risk);border:1px solid var(--risk)}
+.tag.soft{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent)}
+.tag.ok{background:var(--gain-soft);color:var(--gain);border:1px solid var(--gain)}
+
+/* ---------- phases ---------- */
+.phases{list-style:none;padding:0;margin:0;counter-reset:ph -1}
+.phase{
+  display:grid;grid-template-columns:76px 1fr;gap:0 20px;
+  padding:20px 0;border-top:1px solid var(--rule);
+}
+.phase:last-child{border-bottom:1px solid var(--rule)}
+.phase-n{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  color:var(--accent);letter-spacing:.06em;padding-top:4px;
+}
+.phase-n span{display:block;color:var(--muted);font-weight:400;margin-top:3px;font-size:10.5px}
+.phase h3{margin:0 0 6px;font-size:18px}
+.phase p{margin:0 0 10px;font-size:15.5px;color:var(--ink-2)}
+.phase ul{margin:0;font-size:15px;color:var(--ink-2)}
+.phase li{margin-bottom:5px}
+.gate{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--rule);
+  padding:7px 11px;border-radius:2px;margin-top:11px;display:inline-block;
+}
+.gate b{color:var(--accent);font-weight:600}
+
+/* ---------- decisions ---------- */
+.decisions{list-style:none;padding:0;margin:0;counter-reset:d}
+.decision{
+  border-top:1px solid var(--rule);padding:18px 0;
+}
+.decision:last-child{border-bottom:1px solid var(--rule)}
+.decision h3{margin:0 0 6px;font-size:17.5px;display:flex;gap:11px;align-items:baseline}
+.decision h3::before{
+  counter-increment:d;content:"Q" counter(d);
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:600;
+}
+.decision p{margin:0 0 9px;font-size:15.5px;color:var(--ink-2)}
+.rec{
+  font-size:15px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--rule);border-left:2px solid var(--gain);
+  padding:10px 14px;border-radius:2px;max-width:68ch;
+}
+.rec b{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--gain);display:block;margin-bottom:4px;
+}
+
+footer{
+  margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);
+  line-height:1.6;
+}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:560px){
+  body{font-size:16.5px;padding:0 18px 72px}
+  .phase{grid-template-columns:1fr;gap:8px}
+  .phase-n{padding-top:0}
+  .phase-n span{display:inline;margin-left:8px}
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="kicker">Build plan · v0.1 · greenfield</p>
+  <h1>Compound Signal Harness</h1>
+  <p class="standfirst">An agentic pipeline that turns Ritholtz podcast transcripts into a stop-managed swing book. The model <em>reads</em>; deterministic code <em>decides and trades</em>. Sized at $50 in fractional shares, which makes this an integration test with real money rather than a return-seeking strategy — and changes how the stop has to work.</p>
+  <ul class="chips">
+    <li class="chip">sleeve <b>$50 + $10–20/wk</b></li>
+    <li class="chip">stop <b>−7% at Robinhood</b></li>
+    <li class="chip">min trade <b>$25</b></li>
+    <li class="chip">time stop <b>20 sessions</b></li>
+    <li class="chip">shows <b>TCAF · WAYT · Animal Spirits</b></li>
+    <li class="chip">execution <b>approval-gated</b></li>
+  </ul>
+</header>
+
+<div class="primer">
+  <p class="plainly">Start here — no jargon</p>
+  <h2>What this is</h2>
+  <div class="h2-rule"></div>
+
+  <p>You listen to a few podcasts where smart people talk about stocks. Some of what they say is a genuine recommendation. Most of it isn't — it's just news chatter about whatever moved that week. You want to act on the real ones and ignore the rest.</p>
+
+  <p>So we're building a robot that does five things:</p>
+
+  <ol class="steps">
+    <li><b>Listens</b><span>Downloads each new episode the moment it's published, and turns the audio into text.</span></li>
+    <li><b>Takes notes</b><span>Writes down every company mentioned — who said it, whether they sounded positive or negative, and how long they talked about it.</span></li>
+    <li><b>Shortlists</b><span>Every Sunday, looks back over the past month of notes and picks the best few names.</span></li>
+    <li><b>Buys</b><span>Monday morning, puts roughly $16 into each of three stocks.</span></li>
+    <li><b>Watches</b><span>Checks prices through the day and sells anything that falls 7% below what you paid.</span></li>
+  </ol>
+
+  <p class="aside">Everything else in this document is detail about how each of those five steps works, and what can go wrong in them. If you only read this box, you know what's being built.</p>
+
+  <h3>The one thing that surprised me</h3>
+
+  <p>Normally when you buy a stock you can leave a standing instruction with your broker: <em>"if this drops to $14.50, sell it — don't ask me first."</em> That instruction sits at Robinhood, waiting. It works whether or not your laptop is on, whether or not our robot is running. That was going to be your safety net, and it's a good one.</p>
+
+  <p><strong>It doesn't work with $50.</strong> Those standing instructions only apply to whole shares. With $50 you're buying <em>slivers</em> of shares — a fifth of one Nvidia share, say — and Robinhood won't accept a standing sell instruction on a sliver. I checked this against their actual system rather than assuming it.</p>
+
+  <p>So the robot has to be the safety net itself: look at the price every 15 minutes, and sell when it sees the 7% drop.</p>
+
+  <p>Here's why that difference matters. The broker's version is watching all the time, no matter what. Ours is only watching while the program is running. If the robot quietly stops one morning and you don't notice, nothing is protecting your money — and worse, you'll be assuming something is. That's the main thing I want you aware of before we build anything.</p>
+
+  <p><strong>So we buy whole shares whenever we can afford one</strong>, specifically to get that standing order. If the week's pick trades at $30 and you have $50, we buy one share for $30, leave the standing sell order at Robinhood, and let the $20 roll into next week.</p>
+
+  <p>There's a second reason to prefer this that matters as much as the protection: <strong>you can check it yourself.</strong> Open the Robinhood app and the standing order is right there, with the price it will sell at. A stop that only exists inside our robot is invisible to you — you'd be trusting the robot to tell you the truth about its own safety net. Being able to independently confirm your money is protected is worth giving up a bit of flexibility for.</p>
+
+  <p>When the pick is too expensive for a whole share — Nvidia at $180 against your $50 — we fall back to buying a sliver, and the robot's own watching is the only protection. Those positions get flagged on your daily report so you always know which of your holdings Robinhood is watching and which only we are.</p>
+
+  <p class="aside">This gets easier over time. At $50 a lot of names are out of reach as whole shares. By the time an account slot is worth a few hundred dollars, almost everything these shows discuss is affordable, and the unprotected case mostly stops happening.</p>
+
+  <h3>How much goes into each pick</h3>
+
+  <p>All of it, for now. The whole $50 goes into the single best name that week.</p>
+
+  <p>That sounds reckless, but at this size it isn't. Spreading $50 across three stocks means $16 each, which is too small to be worth the effort, and your total downside is fifty dollars either way. Concentrating also means the robot only has to be right about one thing — which is a lot easier to judge than three.</p>
+
+  <p>You're adding $10–20 a week, so this won't stay a one-stock account for long. As the balance grows the robot opens more slots on its own, without you having to decide again:</p>
+
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Account value</th><th>Stocks held at once</th></tr></thead>
+    <tbody>
+      <tr><td>Under $150</td><td>1</td></tr>
+      <tr><td>$150 – $400</td><td>2</td></tr>
+      <tr><td>$400 – $1,000</td><td>3</td></tr>
+      <tr><td>Over $1,000</td><td>4</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>This also solves a problem that would otherwise nag at you. While the robot is holding a stock and you keep depositing, cash piles up doing nothing. With the ladder above, that cash eventually pushes you over a line and the robot simply opens another slot with it.</p>
+
+  <p><strong>And there's a floor: no trade smaller than $25.</strong> Below that the robot reports <em>"no capital available"</em> and waits for your next deposit. A $9 position isn't worth the trade, and saying so out loud is better than quietly making a bad one.</p>
+
+  <h3>What $50 can and can't tell us</h3>
+
+  <p>Three stocks turning over every few weeks means roughly 30 to 40 trades a year. That's far too few to know whether the idea is any good — you could easily be up 40% or down 40% purely on luck, and neither outcome would mean anything.</p>
+
+  <p>So we split the question in two. <strong>To find out whether the idea works</strong>, we replay the last year of podcast episodes and simulate what would have happened. That's free, and it gives us hundreds of practice trades instead of forty. <strong>To find out whether the machine works</strong> — does it actually download the episode, place the order, notice the 7% drop — we use the $50. If something's broken, it costs you fifty dollars to find out instead of five thousand.</p>
+
+  <p class="aside">Short version: the simulation tells us if the <em>picks</em> are good. The $50 tells us if the <em>plumbing</em> works. Don't read a profit or loss this small as a verdict on the strategy.</p>
+</div>
+
+<section>
+  <h2>What I found when I checked Robinhood</h2>
+  <div class="h2-rule"></div>
+  <p>The technical detail starts here. I read Robinhood's actual trading interface before designing this rather than assuming how it works, and four things came back that shaped the plan — three of them limits you'd otherwise hit the expensive way.</p>
+
+  <ol class="findings">
+    <li class="finding">
+      <h3>Broker-native GTC stops exist — use them</h3>
+      <div>
+        <p><code>place_equity_order</code> accepts <code>type: stop_market</code> / <code>stop_limit</code> with <code>stop_price</code> and <code>time_in_force: gtc</code>. Your −7% rule can live <em>at Robinhood</em> as a resting order, not as an agent that has to wake up and notice.</p>
+        <p>This is the single most important design decision in the plan. An exit that depends on a scheduled agent firing is an exit that fails on the day your laptop is closed.</p>
+      </div>
+    </li>
+    <li class="finding">
+      <h3>But stops are regular-hours only</h3>
+      <div>
+        <p>The schema is explicit: <code>market</code>, <code>stop_market</code> and <code>stop_limit</code> are <code>regular_hours</code>-only and are rejected when tagged to another session. Placed after hours, they queue for the next open.</p>
+        <p>So you are unprotected against overnight gaps. A stock that closes at −2% and opens at −14% blows through a stop at the open and fills well below your intended exit. This is why the daily review still earns its place — not to trigger the stop, but to catch what the stop couldn't.</p>
+      </div>
+    </li>
+    <li class="finding">
+      <h3>The data you need for ranking is already on the MCP</h3>
+      <div>
+        <p><code>get_equity_technical_indicators</code> computes ATR, RSI, SMA/EMA, ADX and Bollinger bands server-side. <code>get_equity_historicals</code> returns split-adjusted OHLCV and the schema itself calls that "the right default for backtesting." <code>get_earnings_calendar</code> covers event risk; <code>get_equity_tradability</code> gates orders.</p>
+        <p>No second market-data vendor for v1. That removes a whole class of API-key, quota and reconciliation work.</p>
+      </div>
+    </li>
+  </ol>
+
+  <div class="note risk">
+    <span class="note-label">Finding 04 — fractional shares and stop orders are mutually exclusive</span>
+    <p>This is the one that reshapes the plan at a $50 sleeve. The schema states fractional shares are available <strong>only on <code>type=market</code></strong>, and <code>dollar_amount</code> orders likewise require <code>type=market</code>. A stop is by definition <code>type=stop_market</code> or <code>type=stop_limit</code>.</p>
+    <p><strong>So you cannot place a resting stop order against a fractional position.</strong> Rule 2 — always set a 7% stop — is not enforceable at the broker when every position is a fraction of a share. The GTC stop that was the entire foundation of the exit design is unavailable.</p>
+    <p>One ambiguity worth settling empirically rather than by reading: the <code>tax_lots</code> exclusion list references "fractional-share limit orders," which sits in mild tension with the market-only rule above. A single <code>review_equity_order</code> call settles it definitively and places nothing. Worth doing before writing any execution code.</p>
+  </div>
+
+  <div class="note">
+    <span class="note-label">On who presses the button</span>
+    <p>Your account being agentic-enabled is genuinely useful: it means <strong>your harness</strong> can place orders unattended, which is what makes Phase 3 possible at all. Every read-only tool — quotes, historicals, indicators, earnings, tradability, positions — is fully available for building and validating the system.</p>
+    <p>I don't place trades myself, so the order calls come from your code rather than from me. That's the architecture the plan already assumed, and it's the right one regardless: an LLM improvising share counts against a live account is a failure mode you don't want, and keeping execution deterministic means every order is reproducible from the ledger.</p>
+  </div>
+</section>
+
+<section>
+  <h2>How it's put together</h2>
+  <div class="h2-rule"></div>
+  <p>One organizing principle: <strong>the model reads, the code decides.</strong> Language work — transcription, who said what, whether a mention was bullish — is genuinely hard and genuinely a model problem. Ranking, sizing, order construction and reconciliation are arithmetic, and arithmetic belongs in code you can unit-test and replay.</p>
+  <p>The handoff between them is a single table. That's the contract: the model's only job is to produce well-formed rows in <code>mentions</code>, and the trading system's only input is that table plus market data.</p>
+
+  <figure>
+    <div class="diagram-scroll">
+      <svg viewBox="0 0 900 322" role="img" aria-label="Pipeline diagram: four model stages feed a mentions table, which four deterministic code stages consume.">
+        <text class="band-label" x="20" y="14">MODEL LAYER — READS, JUDGES, NEVER SIZES</text>
+
+        <g><rect class="n-box" x="20" y="24" width="196" height="80" rx="3"/>
+          <text class="n-num" x="34" y="45">01</text>
+          <text class="n-title" x="34" y="66">Ingest</text>
+          <text class="n-sub" x="34" y="83">RSS + YouTube poll</text>
+          <text class="n-sub" x="34" y="95">dedupe by GUID</text></g>
+
+        <g><rect class="n-box" x="248" y="24" width="196" height="80" rx="3"/>
+          <text class="n-num" x="262" y="45">02</text>
+          <text class="n-title" x="262" y="66">Transcribe</text>
+          <text class="n-sub" x="262" y="83">captions, else Whisper</text>
+          <text class="n-sub" x="262" y="95">+ speaker diarization</text></g>
+
+        <g><rect class="n-box" x="476" y="24" width="196" height="80" rx="3"/>
+          <text class="n-num" x="490" y="45">03</text>
+          <text class="n-title" x="490" y="66">Extract</text>
+          <text class="n-sub" x="490" y="83">structured mentions</text>
+          <text class="n-sub" x="490" y="95">stance · conviction</text></g>
+
+        <g><rect class="n-box" x="704" y="24" width="176" height="80" rx="3"/>
+          <text class="n-num" x="718" y="45">04</text>
+          <text class="n-title" x="718" y="66">Resolve</text>
+          <text class="n-sub" x="718" y="83">name → ticker</text>
+          <text class="n-sub" x="718" y="95">securities master</text></g>
+
+        <path class="flow" d="M216 64 H248"/><path class="flow" d="M444 64 H476"/><path class="flow" d="M672 64 H704"/>
+        <path class="flow" d="M792 104 V128" marker-end="url(#ar)"/>
+
+        <rect class="capsule" x="20" y="134" width="860" height="36" rx="18"/>
+        <text class="capsule-txt" x="450" y="157" text-anchor="middle">mentions table — the contract between model and code</text>
+
+        <path class="flow" d="M108 170 V196" marker-end="url(#ar)"/>
+
+        <text class="band-label" x="20" y="192">CODE LAYER — SCORES, SIZES, PLACES, RECONCILES</text>
+
+        <g><rect class="n-box" x="20" y="202" width="196" height="80" rx="3"/>
+          <text class="n-num" x="34" y="223">05</text>
+          <text class="n-title" x="34" y="244">Score &amp; rank</text>
+          <text class="n-sub" x="34" y="261">gates, then composite</text>
+          <text class="n-sub" x="34" y="273">novelty-weighted</text></g>
+
+        <g><rect class="n-box" x="248" y="202" width="196" height="80" rx="3"/>
+          <text class="n-num" x="262" y="223">06</text>
+          <text class="n-title" x="262" y="244">Construct</text>
+          <text class="n-sub" x="262" y="261">size, sector caps</text>
+          <text class="n-sub" x="262" y="273">emit order intents</text></g>
+
+        <g><rect class="n-box" x="476" y="202" width="196" height="80" rx="3"/>
+          <text class="n-num" x="490" y="223">07</text>
+          <text class="n-title" x="490" y="244">Execute</text>
+          <text class="n-sub" x="490" y="261">entry + paired GTC stop</text>
+          <text class="n-sub" x="490" y="273">ref_id idempotency</text></g>
+
+        <g><rect class="n-box" x="704" y="202" width="176" height="80" rx="3"/>
+          <text class="n-num" x="718" y="223">08</text>
+          <text class="n-title" x="718" y="244">Reconcile</text>
+          <text class="n-sub" x="718" y="261">stop integrity, gaps</text>
+          <text class="n-sub" x="718" y="273">attribution feedback</text></g>
+
+        <path class="flow" d="M216 242 H248"/><path class="flow" d="M444 242 H476"/><path class="flow" d="M672 242 H704"/>
+
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path class="arrowhead" d="M 0 0 L 10 5 L 0 10 z"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <figcaption>Stages 01–04 run per episode, on publish. Stages 05–07 run weekly. Stage 08 runs every trading day and feeds learned weights back into 05.</figcaption>
+  </figure>
+
+  <h3>Stack</h3>
+  <p>Python 3.12, SQLite for the ledger, the Claude Agent SDK for stages 02–04, plain <code>httpx</code> + the Robinhood MCP for 05–08. No web service, no container, no queue — this is a single-user system whose entire state fits in one file you can open in a viewer and read.</p>
+
+<pre><code>compound-agent/
+  harness/
+    ingest.py        <span class="cmt"># feed poll, audio fetch, GUID dedupe</span>
+    transcribe.py    <span class="cmt"># captions → Whisper fallback, diarization</span>
+    extract.py       <span class="cmt"># LLM → structured mentions (show-aware prompts)</span>
+    resolve.py       <span class="cmt"># company name → ticker, ambiguity handling</span>
+    score.py         <span class="cmt"># gates + composite ranker  ← pure functions</span>
+    construct.py     <span class="cmt"># sizing, caps, order intents  ← pure functions</span>
+    execute.py       <span class="cmt"># MCP order placement, stop pairing</span>
+    reconcile.py     <span class="cmt"># daily integrity + gap detection</span>
+    attribute.py     <span class="cmt"># post-hoc: which signals actually paid</span>
+    backtest.py      <span class="cmt"># replay engine over historical episodes</span>
+  config/
+    risk.yaml        <span class="cmt"># every tunable number, nothing hardcoded</span>
+    shows.yaml       <span class="cmt"># feeds, speaker rosters, segment hints</span>
+  data/
+    harness.db       <span class="cmt"># the ledger</span>
+    transcripts/     <span class="cmt"># raw + diarized, kept forever</span>
+  runs/              <span class="cmt"># one JSON audit record per trigger firing</span></code></pre>
+
+  <p><code>score.py</code> and <code>construct.py</code> take data in and return decisions out with no I/O. That's what makes the backtest honest — it calls the same functions the live path calls, so you can never accidentally backtest a different strategy than the one you trade.</p>
+</section>
+
+<section>
+  <h2>Steps 1 &amp; 2 — listening and taking notes</h2>
+  <div class="h2-rule"></div>
+
+  <h3>Sources</h3>
+  <p>Ritholtz runs several shows and they have different signal density. The two you named map to the first two rows; the others are worth ingesting even if you weight them to zero at first, because they cost nothing extra once the pipeline exists and they give the backtest more data.</p>
+
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Show</th><th>Cadence</th><th>Format</th><th>Signal character</th></tr></thead>
+    <tbody>
+      <tr><td>The Compound &amp; Friends</td><td>Fri</td><td>Josh, Michael + guest</td><td>Guest often brings the highest-conviction single names</td></tr>
+      <tr><td>What Are Your Thoughts?</td><td>Thu</td><td>Josh vs Michael, topic list</td><td>Explicitly structured as takes — cleanest stance extraction</td></tr>
+      <tr><td>Animal Spirits</td><td>Wed</td><td>Batnick + Carlson</td><td>More macro/ETF, fewer single names</td></tr>
+      <tr><td style="opacity:.55">Ask The Compound</td><td style="opacity:.55">Tue</td><td style="opacity:.55">Carlson + Duncan, mailbag</td><td style="opacity:.55">Out of scope — planning mailbag, negligible single-name density</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>In scope: TCAF, What Are Your Thoughts?, and Animal Spirits.</strong> Animal Spirits skews macro and ETF-heavy, so expect it to contribute index and sector exposure rather than single names — which is fine, since rule 1 admits ETFs. Weight it separately from the two single-name shows in the ranker and let attribution decide whether it earns its weight.</p>
+
+  <p>Ingest from the podcast RSS feeds and the YouTube channel in parallel. YouTube usually posts first and auto-captions land within an hour or two — free, fast, and good enough for extraction. Fall back to Whisper (<code>faster-whisper</code>, large-v3) on the RSS audio when captions are missing or garbled. Store both; never re-fetch an episode already in the ledger.</p>
+
+  <div class="note">
+    <span class="note-label">Diarization matters more than transcription accuracy</span>
+    <p>"Who said it" is a first-class feature. A guest's high-conviction pick, a host's disclosure that he personally owns something, and a passing mention of a stock that's merely in the news are three completely different signals — and they're indistinguishable in an undiarized transcript. Run <code>pyannote</code> for speaker turns, then map speakers to names using the episode description and voice fingerprints you build up over time.</p>
+  </div>
+
+  <h3>The mention record</h3>
+  <p>This is the schema stage 03 produces. Everything downstream reads only this, so it's worth over-specifying rather than under-specifying — fields you don't use yet cost one token each and are impossible to backfill later without re-running every transcript.</p>
+
+<pre><code>{
+  <span class="kw">"episode_id"</span>: "tcaf-2026-08-21",  <span class="kw">"show"</span>: "tcaf",
+  <span class="kw">"speaker"</span>: "Josh Brown",  <span class="kw">"speaker_role"</span>: "host|guest|clip",
+  <span class="kw">"ticker"</span>: "PLTR",  <span class="kw">"resolved_name"</span>: "Palantir",  <span class="kw">"resolve_conf"</span>: 0.98,
+  <span class="kw">"t_start"</span>: 1843,  <span class="kw">"t_end"</span>: 1974,  <span class="kw">"quote"</span>: "...",
+
+  <span class="kw">"stance"</span>: "strong_bull|bull|neutral|bear|strong_bear",
+  <span class="kw">"action_language"</span>: "buying|owns|watching|sold|shorting|none",
+  <span class="kw">"horizon"</span>: "trade|swing|long_term|unspecified",
+
+  <span class="cmt">// the three flags that kill most false positives</span>
+  <span class="kw">"is_thesis"</span>: true,      <span class="cmt">// substantive argument, not a drive-by</span>
+  <span class="kw">"is_news_recap"</span>: false, <span class="cmt">// "NVDA reported last night" ≠ a pick</span>
+  <span class="kw">"is_hypothetical"</span>: false <span class="cmt">// "if you owned X" / describing another's view</span>
+}</code></pre>
+
+  <p>Use show-aware prompts. <em>What Are Your Thoughts?</em> is a bull/bear debate with a known topic list, so the extractor should be told to expect paired takes on the same name. <em>TCAF</em> is conversational with a guest, so the extractor should watch for the guest's book and for Josh's disclosures. One generic prompt across all shows will underperform four tuned ones by a wide margin.</p>
+</section>
+
+<section>
+  <h2>Step 3 — picking the week's names</h2>
+  <div class="h2-rule"></div>
+  <p>You identified this as the hard part, and it is. The specific trap: <strong>these guys talk about mega-cap momentum every single week.</strong> A naive mention-count ranker buys NVDA, AAPL, MSFT and TSLA forever, which is not a strategy — it's a worse-executed index fund with a 7% stop stapled to it.</p>
+
+  <div class="note">
+    <span class="note-label">The key idea — an IDF term for stock mentions</span>
+    <p>Borrow from search ranking. A name's information content is inversely proportional to how often it gets discussed. If NVDA comes up in 90% of episodes, this week's NVDA mention tells you almost nothing. If a name that's appeared twice in a year gets eight minutes of bullish thesis from a guest, that's a real event.</p>
+    <p>So weight each mention by <code>log(total_episodes / episodes_mentioning_ticker)</code>. This is the term that turns "what did they talk about" into "what did they say that was <em>new</em>" — and it's the difference between a signal and a momentum tracker.</p>
+  </div>
+
+  <h3>Stage 1 — hard gates</h3>
+  <p>Applied before scoring. A name that fails any of these is dropped regardless of how enthusiastic the endorsement was. These are cheap to compute and they eliminate most of the ways this strategy loses money mechanically rather than directionally.</p>
+
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Gate</th><th class="mono">Threshold</th><th>Why</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td>Volatility</td><td class="mono">ATR(14)/price ≤ 3.5%</td><td>The stop must be ≥2× daily noise or you're stopped out at random</td><td><span class="tag hard">hard</span></td></tr>
+      <tr><td>Liquidity</td><td class="mono">ADV(20) ≥ $20M</td><td>Slippage and stop-fill quality</td><td><span class="tag hard">hard</span></td></tr>
+      <tr><td>Price floor</td><td class="mono">≥ $5.00</td><td>Sub-$5 spreads make a 7% stop meaningless</td><td><span class="tag hard">hard</span></td></tr>
+      <tr><td>Tradability</td><td class="mono">get_equity_tradability</td><td>Halts, restrictions, fractional eligibility</td><td><span class="tag hard">hard</span></td></tr>
+      <tr><td>Earnings</td><td class="mono">none within 10 sessions</td><td>An earnings gap ignores your stop entirely</td><td><span class="tag soft">half size</span></td></tr>
+      <tr><td>Stance</td><td class="mono">net bullish, ≥1 thesis</td><td>Excludes news-recap and hypothetical mentions</td><td><span class="tag hard">hard</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The volatility gate is the one people skip and then wonder why they lose. With a fixed 7% stop, a name whose average daily range is 4% will breach the stop on ordinary noise within about two sessions — you'd be paying spread and commission to flip a coin. Either the name is calm enough for a 7% stop or it isn't a candidate.</p>
+
+  <h3>Stage 2 — composite score</h3>
+
+<pre><code><span class="cmt"># --- podcast signal, summed over a 28-day lookback ---</span>
+stance_w   = {strong_bull: 1.0, bull: 0.6, neutral: 0, bear: -0.6, strong_bear: -1.0}
+action_w   = {buying: 1.5, owns: 1.25, watching: 1.0, none: 0.8}
+speaker_w  = {host: 1.0, guest: 0.9, clip: 0.3}   <span class="cmt"># learned from attribution later</span>
+
+mention_score = stance_w × action_w × speaker_w
+              × log1p(discussion_seconds / 30)     <span class="cmt"># airtime = conviction proxy</span>
+              × idf(ticker)                        <span class="cmt"># ← the novelty term</span>
+              × exp(-days_since / 10)              <span class="cmt"># recency decay</span>
+              × (0.35 <span class="kw">if</span> is_news_recap <span class="kw">else</span> 1.0)
+
+S = Σ mention_score
+  + 0.25 × S <span class="kw">if</span> ≥2 distinct speakers bullish   <span class="cmt"># corroboration</span>
+  − 0.40 × S <span class="kw">if</span> any speaker bearish            <span class="cmt"># contradiction</span>
+
+<span class="cmt"># --- entry quality: don't buy something already extended ---</span>
+Q = 0.40 × pctile(3mo relative strength vs SPY)
+  + 0.30 × (1 - clamp(|price/SMA20 - 1| / 0.08))   <span class="cmt"># penalize extension</span>
+  + 0.30 × (1 <span class="kw">if</span> price > SMA50 <span class="kw">else</span> 0)
+
+RANK = 0.55 × norm(S) + 0.30 × norm(Q) + 0.15 × norm(liquidity)</code></pre>
+
+  <p>The <code>Q</code> term exists because of your stop. Buying a name that's already run 20% in a week means you're entering near a local high with a 7% stop underneath — the most likely outcome is a stop-out on mean reversion, having captured none of the move. Entry timing isn't optional when the stop is this tight.</p>
+
+  <h3>Stage 3 — portfolio constraints at $50</h3>
+  <p>Most of the constraint machinery from a normal sleeve is dead weight here. Sector caps assume you have enough positions for concentration to be a risk; at three slots, every book is concentrated and the cap never binds. Drop it for now, keep the code path, re-enable it if the sleeve grows.</p>
+
+  <p>What matters at this size is <strong>slot capacity</strong>, and slots are a function of account value rather than the calendar. A weekly-entry book with a 20-session hold overlaps roughly four cohorts, so entering on a fixed weekly schedule would fragment the account into unusable pieces. Slots scale with equity instead, and a slot must be free before it's filled:</p>
+
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Equity</th><th class="mono">Slots</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>&lt; $150</td><td class="mono">1</td><td>Full concentration. Current state at $50</td></tr>
+      <tr><td>$150 – $400</td><td class="mono">2</td><td>Accumulated cash opens the second slot on its own</td></tr>
+      <tr><td>$400 – $1,000</td><td class="mono">3</td><td>Re-enable sector caps here</td></tr>
+      <tr><td>&gt; $1,000</td><td class="mono">4</td><td>Revisit leveraged gate and conviction weighting</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Read equity from the account rather than modelling the deposit schedule — Justin funds this manually at $10–20/week and deposits may not be fully settled, so <code>get_accounts</code> is the source of truth for buying power, not an assumption about what was sent.</p>
+
+  <h3>Sizing one entry</h3>
+  <p><strong>Decided: prefer whole shares so the stop can live at Robinhood.</strong> Share count is irrelevant to what you own, but it is the sole determinant of whether a real stop order is possible — so it gets to shape the order after all. Fall back to a dollar-amount fractional buy only when whole shares can't clear the $25 floor.</p>
+
+<pre><code>budget = min(available_cash, equity / slots)
+<span class="kw">if</span> budget &lt; 25:
+    <span class="kw">return</span> NoCapital(<span class="kw">"no capital available"</span>)
+
+n = floor(budget / share_price)
+
+<span class="kw">if</span> n >= 1 <span class="kw">and</span> n × share_price >= 25:
+    buy(quantity=n, type=<span class="kw">"market"</span>)                  <span class="cmt"># PROTECTED path</span>
+    place_stop(type=<span class="kw">"stop_limit"</span>,
+               stop_price = fill × 0.93,
+               limit_price = fill × 0.915,             <span class="cmt"># caps a bad fill</span>
+               tif = <span class="kw">"gtc"</span>)
+    position.protection = <span class="kw">"broker"</span>
+    <span class="cmt"># leftover change stays as cash and rolls forward</span>
+<span class="kw">else</span>:
+    buy(dollar_amount=budget, type=<span class="kw">"market"</span>)         <span class="cmt"># UNPROTECTED path</span>
+    ledger.stop_price = fill × 0.93
+    position.protection = <span class="kw">"poller"</span>                   <span class="cmt"># flag loudly on reports</span></code></pre>
+
+  <p>The <code>else</code> branch catches two cases: the share price exceeds your whole budget (a $180 name against $50), or whole shares can't reach the floor ($30 cash against a $16 share price — one share is under $25, two is over budget). Both land you fractional and unprotected, and both must be visible on the daily report rather than buried.</p>
+
+  <p>The <code>protection</code> column is the important one. It splits your book into positions Robinhood is watching and positions only we are watching, and those carry genuinely different risk. Any report that doesn't make that distinction is hiding the thing you most need to know.</p>
+
+  <div class="note">
+    <span class="note-label">This constraint dissolves as the account grows</span>
+    <p>At $50 a slot, the whole-share test excludes plenty of what these shows discuss. At $150 it excludes less. By the time a slot is worth $300–400, nearly everything they talk about is affordable as at least one whole share, and the unprotected path stops being reachable in practice.</p>
+    <p>So this is a constraint that bites hardest right now and quietly disappears on its own. Worth knowing before you conclude the rule is too restrictive.</p>
+  </div>
+
+  <h3>Remaining filters</h3>
+  <ul>
+    <li><strong>Sector caps: off below $400.</strong> With one or two slots the cap can never bind. Keep the code path, gate it on the ladder above.</li>
+    <li><strong>Leveraged products: off.</strong> Many aren't fractional-eligible, and concentration plus 3× leverage on a $50 account is not a combination worth testing.</li>
+    <li><strong>Drop anything already held</strong> and anything inside its 31-day wash-sale cooldown.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Step 5 — the safety net</h2>
+  <div class="h2-rule"></div>
+  <p><strong>Decided: hybrid ratchet.</strong> Hard −7% from entry; once the position is up 7%, the stop moves to breakeven; from there it trails 7% below the high water mark. That's the policy. The question is how it gets <em>enforced</em>, and at a fractional sleeve the answer is worse than it would be at whole-share size.</p>
+
+  <div class="note risk">
+    <span class="note-label">The stop is synthetic — and that is a real downgrade, not a workaround</span>
+    <p>Because no resting stop can sit against a fractional position, the harness has to enforce the rule itself: poll the price, compare against the stop level held in the ledger, and fire a <code>market</code> sell when it breaches.</p>
+    <p>This inverts the safety property the original design was built on. A broker-side GTC stop works when your laptop is shut, your network is down, and the harness has crashed. <strong>A synthetic stop works only when the polling job runs.</strong> Every failure of the scheduler is now a failure of your risk control.</p>
+    <p>Be honest about what you actually have: not a 7% stop, but <em>"a 7% stop as observed at the next poll."</em> With 15-minute polling, a fast move can take you out several points below your intended exit — and overnight gaps are entirely unprotected, same as before, but now with no resting order to catch the open either.</p>
+  </div>
+
+  <h3>Mechanics</h3>
+  <p>Entry is a <code>dollar_amount</code> market order in regular hours — the only order shape that buys fractional. There is no paired stop to place, so instead the fill writes <code>stop_price</code> and <code>high_water_mark</code> into <code>positions</code>, and the polling job owns the exit from that moment on.</p>
+
+<pre><code><span class="cmt"># every 15 min, 09:35–15:55 ET</span>
+<span class="kw">for</span> p <span class="kw">in</span> open_positions:
+    px = quote(p.ticker).last
+    p.high_water_mark = max(p.high_water_mark, close_of_prior_session)
+
+    stop = p.entry × 0.93                              <span class="cmt"># hard floor</span>
+    <span class="kw">if</span> p.high_water_mark >= p.entry × 1.07:
+        stop = max(p.entry, p.high_water_mark × 0.93)  <span class="cmt"># breakeven, then trail</span>
+
+    <span class="kw">if</span> px <= stop:
+        sell_market(p.ticker, dollar_amount=<span class="kw">None</span>, quantity=p.qty)
+        record_exit(p, reason=<span class="kw">"stop"</span>)</code></pre>
+
+  <p>Track <code>high_water_mark</code> off daily <em>closes</em>, not intraday highs. A single wick would otherwise ratchet the stop up to a level the stock never really traded at, and take you out on the next ordinary session. Closes are the conservative choice and they keep the backtest reproducible.</p>
+
+  <p>One upside of going synthetic: the ratchet no longer needs cancel-and-replace, so the unprotected-window problem and the order-churn threshold both disappear. The stop level is just a number in your database that the poller reads. Simpler code — carrying strictly more risk.</p>
+
+  <h3>Time stop</h3>
+  <p><strong>Decided: 20 sessions.</strong> If neither the stop nor a meaningful move has resolved a position in about four weeks, exit at market on the next open. No fixed profit target — the trailing leg of the ratchet handles the upside, so winners aren't capped. The daily job evaluates <code>time_stop_date</code> and queues a market exit; because that's a plain sell rather than a stop, it needs no special handling beyond the approval gate.</p>
+
+  <h3>Leveraged products need different sizing</h3>
+  <div class="note risk">
+    <span class="note-label">The 3× math</span>
+    <p>A 7% stop on a 3× ETF is a <strong>2.33% move in the underlying index</strong>. That is well inside a single ordinary session. Applying your rule literally to leveraged products means near-certain stop-outs that have nothing to do with whether the thesis was right.</p>
+    <p>Keep the 7% stop — it's your rule and it's a good one — but size leveraged positions at <strong>one-third</strong> of a normal position. Same dollar risk per trade, and the stop distance now corresponds to a sensible move in the thing you're actually betting on. Also add decay awareness: leveraged ETFs are not multi-week instruments, so pair them with a shorter time stop.</p>
+    <p><strong>Deferred at $50.</strong> A one-third slot here is about $5, and many leveraged ETFs aren't fractional-eligible anyway. Build the gate, leave it off, revisit if the sleeve grows.</p>
+  </div>
+
+  <h3>Gap risk is real and unhedgeable here</h3>
+  <p>Stops are regular-hours-only. If a name gaps below your stop overnight, the resting stop triggers at the open and fills wherever the market is — possibly 15% down. Nothing in this design prevents that; the daily review exists to detect it, book the actual loss, and make sure you don't carry a position you believe is protected but isn't.</p>
+
+  <h3>Frictions that bind at this size</h3>
+  <ul>
+    <li><strong>Same-day round trips are the thing to avoid</strong>, and which rule bites depends on your account type. On a margin/Instant account, four day trades in five business days flags you as a pattern day trader and under $25k that restricts the account for 90 days. On a cash account, PDT doesn't apply but settlement does — reusing unsettled proceeds is a good-faith violation, and three of those restricts you to settled cash for 90 days. Either way the harness needs the same rule: <strong>never exit a position the same session it was opened.</strong> A tight stop will try to make you do this; refuse, and carry the position overnight instead.</li>
+    <li><strong>Wash sales.</strong> Frequent stop-outs and re-entries within 30 days disallow losses across positions. At $50 the tax dollars are immaterial, but the ledger should track it anyway — the habit is free now and expensive to retrofit later. A 31-day cooldown before re-entering a name that stopped you out is good discipline regardless.</li>
+    <li><strong>Spread, not commission.</strong> Robinhood charges no commission and the regulatory sell fees round to zero on a $16 position. The only real friction is the bid-ask spread, which on the large, liquid names these shows discuss runs a few basis points. At this size friction is genuinely not your problem — which is worth knowing, because it means a bad result is signal, not costs.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>What runs, and when</h2>
+  <div class="h2-rule"></div>
+
+  <div class="note risk">
+    <span class="note-label">Scheduling reliability — read this before wiring anything</span>
+    <p>The built-in scheduled-task tool only fires <strong>while the Claude app is open</strong>; missed runs execute on next launch. The session-scoped cron is worse — it's in-memory and expires after seven days. Neither is acceptable for a daily stop-integrity check on a live account.</p>
+    <p>Put anything execution-critical on <strong>macOS <code>launchd</code></strong>, running a plain Python entrypoint. Use the in-app scheduler only for the parts where a late run is merely annoying — the digest, the weekly writeup, the monthly attribution report.</p>
+  </div>
+
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Trigger</th><th class="mono">When</th><th>Does</th><th>Runs on</th></tr></thead>
+    <tbody>
+      <tr><td>Episode watch</td><td class="mono">every 30m, Tue–Fri</td><td>Poll feeds; on a new episode run stages 01–04 and refresh the mentions table</td><td>launchd</td></tr>
+      <tr><td>Weekly ranking</td><td class="mono">Sun 18:00</td><td><strong>The thinking.</strong> Score everything, publish a ranked shortlist and the writeup. Places nothing</td><td>launchd</td></tr>
+      <tr><td>Deploy check</td><td class="mono">daily 09:45</td><td><strong>The acting.</strong> If a slot is free and cash ≥ $25, take the top name off the shortlist, re-verify its entry filters, buy, place the stop</td><td>launchd + approval</td></tr>
+      <tr><td>Stop verification</td><td class="mono">daily 09:50</td><td>Ask Robinhood which stops actually exist; compare against the ledger; apply any queued ratchets by cancel-and-replace</td><td>launchd <span class="tag hard">critical</span></td></tr>
+      <tr><td>Price poll</td><td class="mono">every 15m, 09:35–15:55</td><td>Covers unprotected fractional positions, and catches gap-throughs on protected ones</td><td>launchd <span class="tag hard">critical</span></td></tr>
+      <tr><td>Daily review</td><td class="mono">daily 16:15</td><td>Roll high water marks off the close, compute tomorrow's ratchet targets, queue due time stops, flag earnings</td><td>launchd</td></tr>
+      <tr><td>Weekly digest</td><td class="mono">Sat 09:00</td><td>P&amp;L, what stopped, what worked</td><td>in-app</td></tr>
+      <tr><td>Attribution</td><td class="mono">monthly</td><td>Re-fit speaker and stance weights from realized outcomes</td><td>in-app</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Why the ranking is weekly but the buying is daily</h3>
+
+  <p>These are two different activities and they deserve two different rhythms. Running them on the same schedule is what made the earlier version awkward.</p>
+
+  <p><strong>Ranking is weekly because the information is weekly.</strong> New material arrives when episodes drop — Wednesday through Friday. Re-scoring on a Tuesday morning produces the same answer as Monday, because nothing was said in between. A daily ranker would just be recomputing the same numbers and inviting you to fiddle with a conclusion that hasn't changed.</p>
+
+  <p><strong>Buying is daily because opportunity isn't weekly.</strong> If a stop fires on Tuesday, a slot opens on Tuesday. Under a purely weekly cycle that cash would sit idle until the following Monday — nearly a week of doing nothing for no reason. The daily deploy check just asks a narrow question: <em>is there a free slot and at least $25? If so, take the best name still standing on the current shortlist.</em></p>
+
+  <p>The one thing the daily check must do is re-verify before it acts. A shortlist built on Sunday and used on Thursday is four days stale, and the entry-quality filters — the ones that stop you buying something that has already run 20% — need to be re-run against Thursday's price, not Sunday's. If the name no longer passes, move to the next one on the list rather than buying it anyway.</p>
+
+  <h3>How you check the safety net is actually there</h3>
+
+  <p>This is the routine, and it's deliberately something you can do yourself without trusting the robot.</p>
+
+  <p>Positions bought as whole shares have their stop <strong>at Robinhood</strong>. It's a real order sitting in your account, and you can see it in the app under the position — including the price it will sell at. The 09:50 job asks Robinhood what stops exist, compares that list to what the ledger expects, and raises an alarm on any mismatch: a missing stop, a stop at the wrong price, a stop on a position you've already exited.</p>
+
+  <p>That's a much better arrangement than the robot marking its own homework. There is an authoritative external record, our system's belief about it, and a daily reconciliation between the two. When they disagree, Robinhood is right and the ledger is wrong.</p>
+
+  <p>Positions bought as fractions have no such record, and the price poll is the only thing standing behind them. Those get flagged on every report. Give the poll a heartbeat — write a timestamp on each successful run and have the evening review shout if the day's count came up short. A poller that quietly stopped is worse than no protection at all, because you'd still believe you were covered.</p>
+
+  <p class="aside">Fifteen minutes for the poll is a judgment call, not a derived number. On a $50 position the difference between a 7% and a 9% realised exit is about a dollar, so it isn't worth optimising. Whether it runs at all matters enormously more than how often.</p>
+
+  <p>The 09:45 entry window is deliberate too: it avoids the opening auction, by which point the overnight reaction to a Friday episode has largely resolved and spreads have normalized. Every run writes a JSON record to <code>runs/</code> and is idempotent — re-running Monday's entry trigger twice must not double your position, which is what <code>ref_id</code> is for. Generate the UUID from a hash of <code>(date, symbol, side, intent_id)</code> so a retry naturally reuses it.</p>
+</section>
+
+<section>
+  <h2>How it reaches you</h2>
+  <div class="h2-rule"></div>
+
+  <p><strong>Decided: push notifications.</strong> Which is right, but it has a hole in it that needs closing first.</p>
+
+  <div class="note risk">
+    <span class="note-label">A dead robot can't tell you it's dead</span>
+    <p>If every alert comes <em>from</em> the harness, then the harness failing is the one event that generates no alert. Silence would be indistinguishable from a quiet, healthy day — and it would arrive exactly when your unprotected positions have nothing watching them.</p>
+    <p>The fix is a <strong>dead-man's switch</strong>: the price poll pings an outside service at the end of every successful run, and that service alerts <em>you</em> when a ping fails to arrive. It inverts the logic — silence becomes the alarm rather than the comfort. <a href="https://healthchecks.io">healthchecks.io</a> does exactly this on a free tier, and it's about four lines of code to wire up.</p>
+    <p>This is the single highest-value piece of monitoring in the whole system. Build it before you build the pretty status report.</p>
+  </div>
+
+  <h3>Three tiers, because everything buzzing is the same as nothing buzzing</h3>
+  <p>If routine activity pings your phone, you'll start dismissing notifications without reading them — and then the ones that matter stop working too. Triage them up front:</p>
+
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Tier</th><th>Events</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag hard">wake me</span></td><td>Buy filled but stop failed to place · stop missing at Robinhood when one is expected · price poll stopped running · order rejected</td><td>Push immediately, ignore quiet hours, repeat until acknowledged</td></tr>
+      <tr><td><span class="tag soft">tell me</span></td><td>Bought something · stopped out · time-stop exit · gapped through a stop</td><td>Push once, respect quiet hours</td></tr>
+      <tr><td><span class="tag ok">just log</span></td><td>No capital available · weekly shortlist ready · nothing to do today</td><td>Written to the digest, never pushed</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Note what's in the top tier: it's almost entirely <em>the safety net failing</em>, not the market moving against you. Losing 7% on a position is the system working as designed and belongs in tier two. A position sitting there with no stop on it is the system broken, and that's worth interrupting dinner for.</p>
+
+  <h3>Plumbing</h3>
+  <p>The critical jobs run under <code>launchd</code> as plain Python, independent of any Claude session, so they need a notification channel that doesn't depend on an app being open. Two straightforward options:</p>
+  <ul>
+    <li><strong><a href="https://ntfy.sh">ntfy.sh</a></strong> — free, no account, one HTTP POST, phone app on both platforms. Caveat: on the public instance your topic name is the only thing keeping it private, so pick something unguessable or self-host.</li>
+    <li><strong>Pushover</strong> — about $5 once, proper accounts and delivery receipts, supports the repeat-until-acknowledged behaviour tier one wants.</li>
+  </ul>
+  <p>Either is fine. Pushover earns its fiver if you want tier-one alerts that keep nagging until you actually look at them.</p>
+
+  <p>Anything running as a Claude scheduled task — the weekly writeup, monthly attribution — can use the built-in notification path instead, which reaches your phone when Remote Control is connected. Keep the two channels separate rather than routing critical alerts through the app; the whole point of the launchd jobs is that they don't depend on it.</p>
+</section>
+
+<section>
+  <h2>What we keep track of</h2>
+  <div class="h2-rule"></div>
+
+<pre><code>episodes    <span class="cmt">(id, show, guid, published_at, audio_url, transcript_path, state)</span>
+mentions    <span class="cmt">(id, episode_id, speaker, ticker, stance, action_language,</span>
+             <span class="cmt"> horizon, is_thesis, is_news_recap, t_start, t_end, quote)</span>
+candidates  <span class="cmt">(week, ticker, S, Q, idf, gates_passed, gates_failed, rank)</span>
+intents     <span class="cmt">(id, week, ticker, side, target_dollars, stop_price, status)</span>
+orders      <span class="cmt">(id, intent_id, ref_id, rh_order_id, type, qty, price, state)</span>
+positions   <span class="cmt">(ticker, qty, entry_price, entry_date, stop_price,</span>
+             <span class="cmt"> high_water_mark, time_stop_date, no_exit_before)</span>
+polls       <span class="cmt">(ts, positions_checked, breaches, ok, pinged_deadman)</span>
+alerts      <span class="cmt">(ts, tier, event, message, delivered, acknowledged_at)</span>
+exits       <span class="cmt">(position_id, exit_date, exit_price, reason, pnl, pnl_pct)</span>
+runs        <span class="cmt">(id, trigger, started_at, status, payload_json)</span></code></pre>
+
+  <p><code>exits.reason</code> is an enum — <code>stop</code>, <code>gap_through</code>, <code>time_stop</code>, <code>thesis_change</code>, <code>manual</code> — and it's the single most valuable column in the database. It's what lets attribution answer the question that determines whether this whole thing is worth running: <em>are you losing on stops that were too tight, or on picks that were wrong?</em> Those have opposite fixes.</p>
+</section>
+
+<section>
+  <h2>The order we build it in</h2>
+  <div class="h2-rule"></div>
+  <p>Phase 0 is not optional and it's not a formality. It's the phase that tells you whether the premise holds, and it costs nothing but time.</p>
+
+  <div class="note">
+    <span class="note-label">What $50 is for, and what it isn't</span>
+    <p>Three slots turning over every few weeks produces maybe 30–40 trades a year. That is nowhere near enough to separate skill from luck — you could be up 40% or down 40% on noise alone, and neither result would tell you anything about the ranker.</p>
+    <p>So the division of labour is: <strong>the backtest is the evidence, and the $50 is the integration test.</strong> Fifty-two weeks of episodes gives you hundreds of simulated trades to judge the strategy on. The live sleeve exists to prove the plumbing works — that the poller fires, that orders fill, that the ledger reconciles — with the downside capped at the price of a decent dinner. Those are two different questions and the $50 only answers the second one. Don't read a P&amp;L this small as a verdict on the picks.</p>
+  </div>
+
+  <ol class="phases">
+    <li class="phase">
+      <div class="phase-n">PHASE 0<span>~1 week</span></div>
+      <div>
+        <h3>Backtest the premise</h3>
+        <p>Before writing a single line of execution code, answer: does a podcast-mention signal actually have edge, net of a 7% stop?</p>
+        <ul>
+          <li>Ingest and transcribe the last 52 weeks of episodes — the pipeline you build here is the production pipeline</li>
+          <li>Extract mentions; hand-label ~150 of them to measure extractor precision and recall</li>
+          <li>Replay: enter next open after episode, 7% stop against intraday lows from <code>get_equity_historicals</code></li>
+          <li>Compare to SPY, and to a naive "buy every bullish mention" baseline</li>
+        </ul>
+        <div class="gate"><b>Gate:</b> ranker beats the naive baseline AND clears SPY after costs. If not, tune or stop — don't fund it.</div>
+      </div>
+    </li>
+
+    <li class="phase">
+      <div class="phase-n">PHASE 1<span>~1 week</span></div>
+      <div>
+        <h3>Live pipeline, paper only</h3>
+        <p>Stages 01–06 running on triggers, producing a weekly slate you can read. No broker connection at all.</p>
+        <ul>
+          <li>launchd jobs for episode watch and Sunday slate</li>
+          <li>Weekly writeup: names, scores, the quote that drove each pick, gates passed and failed</li>
+          <li>Paper ledger tracking hypothetical fills and stops</li>
+        </ul>
+        <div class="gate"><b>Gate:</b> four consecutive weeks where you'd have been comfortable taking every trade it proposed.</div>
+      </div>
+    </li>
+
+    <li class="phase">
+      <div class="phase-n">PHASE 2<span>~1 week</span></div>
+      <div>
+        <h3>Broker integration, approval-gated</h3>
+        <p>Real orders with $50 behind them. Every intent requires your explicit yes before it's placed. This is an integration test that happens to use real money, and the money is small enough that the bugs are affordable.</p>
+        <ul>
+          <li>Settle the fractional-stop ambiguity with a <code>review_equity_order</code> probe before writing execution code</li>
+          <li><code>review_equity_order</code> before every placement; surface cost and alerts</li>
+          <li>Stop poller running on <code>launchd</code> with a heartbeat and a missed-run alarm</li>
+          <li>Same-session-exit block, so a stop breach on entry day queues for the next open instead of tripping a round-trip violation</li>
+        </ul>
+        <div class="gate"><b>Gate:</b> one full month where the poller fired every expected cycle and every stop breach produced a correctly recorded exit. You are testing the machine, not the strategy.</div>
+      </div>
+    </li>
+
+    <li class="phase">
+      <div class="phase-n">PHASE 3<span>ongoing</span></div>
+      <div>
+        <h3>Loosen the leash, selectively</h3>
+        <p>Auto-place entries under a per-trade dollar ceiling; keep approval for anything larger, anything leveraged, and any position sized above the normal cap.</p>
+        <ul>
+          <li>Circuit breakers: daily loss limit, consecutive-stop-out limit, global kill switch</li>
+          <li>Monthly attribution re-fits speaker and stance weights from realized <code>exits</code></li>
+        </ul>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section>
+  <h2>Decisions</h2>
+  <div class="h2-rule"></div>
+
+  <h4>Settled</h4>
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Question</th><th>Call</th><th>Consequence in the build</th></tr></thead>
+    <tbody>
+      <tr><td>Stop semantics</td><td>Hybrid ratchet — −7% from entry, breakeven at +7%, then trail 7% from high water mark</td><td>No native order type; daily cancel-and-replace, and the 09:45 job becomes execution-critical</td></tr>
+      <tr><td>Time stop</td><td>20 sessions, market exit. No profit target</td><td><code>positions.time_stop_date</code>; evaluated nightly, executed at the open</td></tr>
+      <tr><td>Autonomy</td><td>Approval-gated through Phase 2 minimum</td><td><code>review_equity_order</code> then explicit yes on every order; capped auto-placement deferred to Phase 3</td></tr>
+      <tr><td>Shows in scope</td><td>TCAF, What Are Your Thoughts?, Animal Spirits</td><td>Three ingest adapters; Animal Spirits weighted separately as a macro/ETF source</td></tr>
+      <tr><td>Sleeve</td><td>$50, fractional shares only</td><td>Forces synthetic stops; 3 slots at ~$16; sector caps and leveraged products switched off</td></tr>
+      <tr><td>Who places orders</td><td>Agentic-enabled account; the harness places its own orders</td><td>Phase 3 unattended execution is viable. Order calls come from your code, not from me</td></tr>
+      <tr><td>Concentration</td><td>Full budget into the single top pick; slots scale with equity (1 / 2 / 3 / 4)</td><td>Idle cash resolves itself by crossing a tier. Sector caps re-enable at $400</td></tr>
+      <tr><td>Minimum trade</td><td>$25 — below that, report "no capital available" and wait</td><td>Hard floor checked before any sizing math runs</td></tr>
+      <tr><td>Order style</td><td>Whole shares whenever affordable, so the stop can rest at Robinhood; dollar-amount fractional only as fallback</td><td>Positions split into broker-protected and poller-only; the difference is reported daily</td></tr>
+      <tr><td>Cadence</td><td>Rank weekly (Sun), deploy daily if a slot is free</td><td>New information is weekly; opportunity isn't. Daily check re-verifies entry filters before acting</td></tr>
+      <tr><td>Alerts</td><td>Push notifications, tiered; dead-man's switch for the price poll</td><td>Critical alerts run through launchd + ntfy/Pushover, not through the Claude app</td></tr>
+      <tr><td>Funding</td><td>$10–20/week added manually</td><td>Read buying power from the account; never assume a deposit has settled</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>Still open</h4>
+  <ol class="decisions">
+    <li class="decision">
+      <h3>How do you want to handle rule 2 not being enforceable?</h3>
+      <p>Your stop rule was written assuming a stop order exists. At fractional size it doesn't, and the synthetic replacement is materially weaker. That's a decision about risk appetite, not a technical detail, so it's yours.</p>
+      <p>Three coherent responses. <strong>Accept the degradation</strong> — run synthetic stops, poll every 15 minutes, and treat "7% at next poll" as the real rule. Downside is bounded at $50 and the point of this phase is learning, so this is defensible. <strong>Restrict the universe to whole-share-affordable names</strong> — real broker stops return, but at ~$16 a slot that means only stocks under $16, which excludes essentially everything these shows discuss and drags in exactly the low-priced, high-ATR names your volatility gate is designed to reject. <strong>Stay on paper</strong> until the sleeve supports whole shares, and spend the time on the backtest instead.</p>
+      <div class="rec"><b>Recommend</b> Accept the degradation and go live small. The universe restriction breaks the strategy to preserve a mechanism, which is backwards, and $50 is a genuinely good price for finding out whether your polling job is reliable — that's a lesson better learned at this size than at a size where it costs something.</div>
+    </li>
+  </ol>
+</section>
+
+<footer>
+  Compound Signal Harness · build plan v0.1 · drafted 26 Aug 2026<br>
+  Not investment advice. Every threshold in this document is a starting point to be validated in Phase 0, not a recommendation.
+</footer>
+
+</div>

@@ -1,0 +1,17 @@
+# Ledger — regenerable from transcripts, and account-specific
+data/harness.db
+data/harness.db-wal
+data/harness.db-shm
+data/audio/
+runs/
+
+# Transcripts ARE committed (data/transcripts/). They're ~11MB, and
+# re-acquiring them depends on YouTube continuing to cooperate.
+
+# Secrets — never commit broker or notification credentials
+.env
+config/secrets.json
+
+__pycache__/
+*.pyc
+.DS_Store

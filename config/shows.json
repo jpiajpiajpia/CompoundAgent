@@ -1,0 +1,59 @@
+{
+  "feeds": [
+    {
+      "feed_id": "compound",
+      "url": "https://feed.pippa.io/public/shows/5c1d3a90e6bc692c38b2221f",
+      "self_url": "https://feeds.megaphone.fm/TCP4771071679",
+      "name": "The Compound and Friends",
+      "enabled": true,
+      "note": "Single feed carries several formats; classified per-episode by shows.classify()"
+    },
+    {
+      "feed_id": "animal_spirits",
+      "url": null,
+      "name": "Animal Spirits",
+      "enabled": false,
+      "note": "Feed URL to be resolved. Macro/ETF weighted separately in the ranker."
+    }
+  ],
+  "classification": {
+    "comment": "Weekday is the primary signal; title shape corroborates. Raw weekday and title are stored so episodes can be reclassified without re-fetching.",
+    "weekday_map": {
+      "Tue": "wayt",
+      "Fri": "tcaf",
+      "Mon": "compound_other",
+      "Wed": "compound_other",
+      "Thu": "compound_other",
+      "Sat": "compound_other",
+      "Sun": "compound_other"
+    },
+    "guest_markers": [
+      " with ",
+      " With ",
+      " w/ "
+    ],
+    "topic_list_min_commas": 2
+  },
+  "show_weights": {
+    "comment": "Starting weights for the ranker. Re-fit monthly from realized exits.",
+    "wayt": 1.0,
+    "tcaf": 1.0,
+    "compound_other": 0.85,
+    "animal_spirits": 0.6
+  },
+  "youtube": {
+    "channel_id": "UCBRpqrzuuqE8TZcWw75JSdw",
+    "player_client": "android",
+    "comment": "Per-show playlists avoid the clip/shorts noise on the main channel and give show classification for free. Ask The Compound is out of scope per the plan.",
+    "playlists": {
+      "tcaf": "PLZgCX3KJ3XGAq-6Ewy4ClI88EIYDxJsaS",
+      "wayt": "PLZgCX3KJ3XGDugSOCJzIrAxQxMV1osLXc",
+      "animal_spirits": "PLZgCX3KJ3XGCNSt9ynclginAZzAvgmzk3"
+    },
+    "match": {
+      "comment": "Titles are unusable for WAYT (YouTube re-headlines them), so match on date+duration. Title similarity is only a tiebreaker.",
+      "max_date_delta_days": 3,
+      "max_duration_delta_pct": 0.12
+    }
+  }
+}
