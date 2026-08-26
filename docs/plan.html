@@ -323,8 +323,9 @@ footer{
   <h1>Compound Signal Harness</h1>
   <p class="standfirst">An agentic pipeline that turns Ritholtz podcast transcripts into a stop-managed swing book. The model <em>reads</em>; deterministic code <em>decides and trades</em>. Sized at $50 in fractional shares, which makes this an integration test with real money rather than a return-seeking strategy — and changes how the stop has to work.</p>
   <ul class="chips">
-    <li class="chip">sleeve <b>$50 + $10–20/wk</b></li>
-    <li class="chip">stop <b>−7% at Robinhood</b></li>
+    <li class="chip">sleeve <b>$50 · cash acct</b></li>
+    <li class="chip">size <b>$10–30 fractional</b></li>
+    <li class="chip">stop <b>−7% robot-watched</b></li>
     <li class="chip">min trade <b>$25</b></li>
     <li class="chip">time stop <b>20 sessions</b></li>
     <li class="chip">shows <b>TCAF · WAYT · Animal Spirits</b></li>
@@ -969,7 +970,9 @@ runs        <span class="cmt">(id, trigger, started_at, status, payload_json)</s
       <tr><td>Who places orders</td><td>Agentic-enabled account; the harness places its own orders</td><td>Phase 3 unattended execution is viable. Order calls come from your code, not from me</td></tr>
       <tr><td>Concentration</td><td>Full budget into the single top pick; slots scale with equity (1 / 2 / 3 / 4)</td><td>Idle cash resolves itself by crossing a tier. Sector caps re-enable at $400</td></tr>
       <tr><td>Minimum trade</td><td>$25 — below that, report "no capital available" and wait</td><td>Hard floor checked before any sizing math runs</td></tr>
-      <tr><td>Order style</td><td>Whole shares whenever affordable, so the stop can rest at Robinhood; dollar-amount fractional only as fallback</td><td>Positions split into broker-protected and poller-only; the difference is reported daily</td></tr>
+      <tr><td>Order style</td><td>Fractional dollar amounts, $10–30 per position</td><td>Live quotes showed 0 of 8 typical candidates affordable as whole shares at $50. Broker-side stops are therefore unreachable — all stops are robot-watched</td></tr>
+      <tr><td>Account</td><td>Cash account (not margin)</td><td>Day-trader rule doesn't apply; settlement does. Never exit the session you entered</td></tr>
+      <tr><td>Execution runtime</td><td>Claude scheduled task</td><td>Connector is unreachable from launchd. Analysis stays local; orders and the stop poll run in Claude — and only while it's open</td></tr>
       <tr><td>Cadence</td><td>Rank weekly (Sun), deploy daily if a slot is free</td><td>New information is weekly; opportunity isn't. Daily check re-verifies entry filters before acting</td></tr>
       <tr><td>Alerts</td><td>Push notifications, tiered; dead-man's switch for the price poll</td><td>Critical alerts run through launchd + ntfy/Pushover, not through the Claude app</td></tr>
       <tr><td>Funding</td><td>$10–20/week added manually</td><td>Read buying power from the account; never assume a deposit has settled</td></tr>

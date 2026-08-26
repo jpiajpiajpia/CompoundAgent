@@ -1,0 +1,76 @@
+{
+  "_comment": "Every tunable number lives here. Nothing risk-related is hardcoded.",
+  "account": {
+    "account_number": "880836572",
+    "nickname": "Agentic",
+    "type": "cash",
+    "_note": "Cash account, NOT margin. Pattern-day-trader rules do not apply. Settlement does: proceeds are unspendable until T+1, and three good-faith violations restrict the account for 90 days. Hence never_exit_same_session below."
+  },
+  "sizing": {
+    "min_position_usd": 10.0,
+    "max_position_usd": 30.0,
+    "order_style": "dollar_amount",
+    "_note": "Fractional buys via dollar_amount market orders. Whole shares were the plan until live quotes showed 0 of 8 typical candidates were affordable at this account size (cheapest, NKE at $38.59, exceeded $37.94 buying power). Revisit whole shares near $250 equity.",
+    "slots_by_equity": [
+      {
+        "under": 150,
+        "slots": 2
+      },
+      {
+        "under": 400,
+        "slots": 3
+      },
+      {
+        "under": 1000,
+        "slots": 4
+      },
+      {
+        "under": null,
+        "slots": 4
+      }
+    ]
+  },
+  "stops": {
+    "initial_pct": 0.07,
+    "breakeven_trigger_pct": 0.07,
+    "trail_pct": 0.07,
+    "protection": "poller",
+    "_note": "Synthetic only. Fractional positions cannot carry a resting stop order (fractional requires type=market; a stop is type=stop_market/stop_limit). The 15-minute poll IS the risk control -- it needs a dead-man's switch.",
+    "high_water_mark_source": "daily_close",
+    "poll_interval_minutes": 15
+  },
+  "exits": {
+    "time_stop_sessions": 20,
+    "never_exit_same_session": true,
+    "wash_sale_cooldown_days": 31
+  },
+  "gates": {
+    "max_atr_pct": 0.035,
+    "min_adv_usd": 20000000,
+    "min_price": 5.0,
+    "earnings_blackout_sessions": 10,
+    "sector_cap_enabled_above_equity": 400,
+    "allow_leveraged": false
+  },
+  "excluded_symbols": {
+    "_note": "Pre-existing holdings the harness must never touch. Empty once liquidated.",
+    "symbols": [
+      "NKE",
+      "QCOM",
+      "TSLA",
+      "AAPL"
+    ]
+  },
+  "execution": {
+    "runtime": "claude_scheduled_task",
+    "_note": "Order placement and the stop poll run as Claude scheduled tasks, because the Robinhood connector is authenticated to Claude and unreachable from a standalone launchd script. Consequence: protection exists ONLY while the Claude app is open during market hours.",
+    "analysis_runtime": "launchd",
+    "_analysis_note": "Ingest, transcription and ranking need no broker access, so they stay on launchd and run regardless.",
+    "unprotected_window_alert": true,
+    "market_hours_et": {
+      "open": "09:30",
+      "close": "16:00"
+    },
+    "max_silent_minutes_during_market_hours": 45
+  }
+}
