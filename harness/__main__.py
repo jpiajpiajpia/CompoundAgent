@@ -5,7 +5,7 @@ import argparse
 import json
 import sys
 
-from . import db, ingest, transcribe, youtube
+from . import db, extract, ingest, transcribe, youtube
 
 
 def cmd_ingest(args) -> int:
@@ -33,6 +33,14 @@ def cmd_match(args) -> int:
 def cmd_transcribe(args) -> int:
     with db.session() as conn:
         stats = transcribe.run(conn, limit=args.limit, delay=args.delay)
+    print(json.dumps(stats, indent=2))
+    return 0
+
+
+def cmd_extract(args) -> int:
+    with db.session() as conn:
+        stats = extract.run(conn, limit_episodes=args.limit, show=args.show,
+                            dry_run=args.dry_run)
     print(json.dumps(stats, indent=2))
     return 0
 
@@ -98,6 +106,13 @@ def main(argv=None) -> int:
     pt.add_argument("--limit", type=int, default=None)
     pt.add_argument("--delay", type=float, default=1.0)
     pt.set_defaults(func=cmd_transcribe)
+
+    pe = sub.add_parser("extract", help="pull stock mentions out of transcripts")
+    pe.add_argument("--limit", type=int, default=None, help="max episodes")
+    pe.add_argument("--show", default=None, help="wayt | tcaf")
+    pe.add_argument("--dry-run", action="store_true",
+                    help="count segments without calling the API")
+    pe.set_defaults(func=cmd_extract)
 
     ps = sub.add_parser("status", help="what is in the ledger")
     ps.set_defaults(func=cmd_status)

@@ -1,0 +1,3 @@
+# Stage 03 onward. Stages 01-02 are stdlib-only by design.
+anthropic>=1.0
+yt-dlp>=2025.10
