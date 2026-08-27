@@ -3,8 +3,8 @@
   "account": {
     "account_number": "880836572",
     "nickname": "Agentic",
-    "type": "cash",
-    "_note": "Cash account, NOT margin. Pattern-day-trader rules do not apply. Settlement does: proceeds are unspendable until T+1, and three good-faith violations restrict the account for 90 days. Hence never_exit_same_session below."
+    "type": "limited_margin",
+    "_note": "Account type CHANGED from 'cash' to 'limited_margin' on 27 Aug 2026. Limited margin allows trading unsettled proceeds immediately, which removes the good-faith-violation risk the original design guarded against. UNVERIFIED: whether pattern-day-trader rules now apply to this account - they do not on a cash account but may on a margin one, and under $25k that would mean a 90-day restriction after four day trades in five business days. Confirm with Robinhood before relaxing never_exit_same_session below."
   },
   "sizing": {
     "min_position_usd": 10.0,
@@ -42,7 +42,8 @@
   "exits": {
     "time_stop_sessions": 20,
     "never_exit_same_session": true,
-    "wash_sale_cooldown_days": 31
+    "wash_sale_cooldown_days": 31,
+    "_never_exit_same_session_note": "Kept ON. The original reason (cash-account settlement) no longer applies, but the PDT question is open and the rule is cheap insurance either way."
   },
   "gates": {
     "max_atr_pct": 0.035,
