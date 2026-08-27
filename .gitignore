@@ -3,6 +3,7 @@ data/harness.db
 data/harness.db-wal
 data/harness.db-shm
 data/audio/
+data/prices/
 runs/
 # ...but extraction OUTPUT is not regenerable — it is hand-classified judgement
 # and the only copy of it. Track it so the ledger can always be rebuilt.

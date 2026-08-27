@@ -5,7 +5,7 @@ import argparse
 import json
 import sys
 
-from . import db, extract, ingest, transcribe, youtube
+from . import backtest, db, extract, ingest, transcribe, youtube
 
 
 def cmd_ingest(args) -> int:
@@ -70,6 +70,26 @@ def cmd_load(args) -> int:
                 conn.execute("UPDATE episodes SET state='extracted' WHERE id=?", (ep,))
             conn.commit()
     print(json.dumps(stats, indent=2))
+    return 0
+
+
+def cmd_backtest(args) -> int:
+    import math, statistics as st
+    with db.session() as conn:
+        rows = conn.execute("""SELECT m.ticker, e.published_at, m.stance FROM mentions m
+                               JOIN episodes e ON e.id=m.episode_id
+                               WHERE m.is_thesis=1 AND m.is_hypothetical=0 AND m.is_news_recap=0
+                                 AND m.ticker IS NOT NULL AND m.stance IN ('bull','strong_bull')""").fetchall()
+    picks = [{"ticker": r["ticker"], "date": r["published_at"][:10], "stance": r["stance"]}
+             for r in rows]
+    res = backtest.run(picks)
+    ex = [t["excess"] for t in res["trades"] if t["excess"] is not None]
+    out = {k: v for k, v in res.items() if k != "trades"}
+    if len(ex) > 1:
+        se = st.stdev(ex) / math.sqrt(len(ex))
+        out["t_stat"] = round(st.mean(ex) / se, 2)
+        out["significant"] = abs(out["t_stat"]) > 2
+    print(json.dumps(out, indent=2, default=str))
     return 0
 
 
@@ -147,6 +167,9 @@ def main(argv=None) -> int:
     pl.add_argument("--file", required=True, help="JSON array of mention records")
     pl.add_argument("--mark-extracted", action="store_true")
     pl.set_defaults(func=cmd_load)
+
+    pk = sub.add_parser("backtest", help="replay picks against real prices")
+    pk.set_defaults(func=cmd_backtest)
 
     ps = sub.add_parser("status", help="what is in the ledger")
     ps.set_defaults(func=cmd_status)
